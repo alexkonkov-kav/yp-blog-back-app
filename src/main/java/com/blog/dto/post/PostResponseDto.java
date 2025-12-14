@@ -1,9 +1,9 @@
-package com.blog.model;
+package com.blog.dto.post;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class Post {
+public class PostResponseDto {
 
     private Long id;
 
@@ -11,13 +11,13 @@ public class Post {
 
     private String text;
 
-    private Integer likesCount = 0;
+    private List<String> tags = new ArrayList<>();
 
-    private Integer commentsCount = 0;
+    private Integer likesCount;
 
-    private List<Tag> tags = new ArrayList<>();
+    private Integer commentsCount;
 
-    public Post() {
+    public PostResponseDto() {
     }
 
     public Long getId() {
@@ -44,6 +44,14 @@ public class Post {
         this.text = text;
     }
 
+    public List<String> getTags() {
+        return tags;
+    }
+
+    public void setTags(List<String> tags) {
+        this.tags = tags;
+    }
+
     public Integer getLikesCount() {
         return likesCount;
     }
@@ -58,13 +66,5 @@ public class Post {
 
     public void setCommentsCount(Integer commentsCount) {
         this.commentsCount = commentsCount;
-    }
-
-    public List<Tag> getTags() {
-        return tags;
-    }
-
-    public void setTags(List<Tag> tags) {
-        this.tags = tags;
     }
 }
