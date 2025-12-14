@@ -26,7 +26,15 @@
       <max-request-size>20971520</max-request-size> <!-- 20MB -->
     </multipart-config>
   </servlet>
-
+  <servlet>
+    <servlet-name>H2Console</servlet-name>
+    <servlet-class>org.h2.server.web.JakartaWebServlet</servlet-class>
+    <load-on-startup>2</load-on-startup>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>H2Console</servlet-name>
+    <url-pattern>/h2-console/*</url-pattern>
+  </servlet-mapping>
   <!-- DispatcherServlet обрабатывает все запросы -->
   <servlet-mapping>
     <servlet-name>dispatcher</servlet-name>
