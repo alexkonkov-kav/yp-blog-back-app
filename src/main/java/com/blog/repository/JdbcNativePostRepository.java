@@ -29,6 +29,6 @@ public class JdbcNativePostRepository implements PostRepository {
                             post.setCommentsCount(rs.getInt("comments_count"));
                             return post;
                         }, id);
-        return posts.isEmpty() ? Optional.empty() : Optional.of(posts.get(0));
+        return posts.isEmpty() ? Optional.empty() : Optional.of(posts.getFirst());
     }
 }
