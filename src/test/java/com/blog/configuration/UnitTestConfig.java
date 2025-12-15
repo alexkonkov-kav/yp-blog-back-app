@@ -1,12 +1,12 @@
 package com.blog.configuration;
 
+import com.blog.mapper.PostMapper;
 import com.blog.repository.PostRepository;
-import com.blog.repository.TagRepository;
 import com.blog.service.PostService;
-import org.springframework.beans.factory.annotation.Qualifier;
+import com.blog.service.PostTagService;
+import com.blog.service.TagService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
 
 import static org.mockito.Mockito.mock;
@@ -16,20 +16,30 @@ import static org.mockito.Mockito.mock;
 public class UnitTestConfig {
 
     @Bean
-    public PostService postService(@Qualifier("postRepository") PostRepository postRepository,
-                                   @Qualifier("tagRepository") TagRepository tagRepository) {
-        return new PostService(postRepository, tagRepository);
+    public PostService postService(PostRepository postRepository,
+                                   TagService tagService,
+                                   PostTagService postTagService,
+                                   PostMapper postMapper) {
+        return new PostService(postRepository, tagService, postTagService, postMapper);
     }
 
     @Bean
-    @Primary
     public PostRepository postRepository() {
         return mock(PostRepository.class);
     }
 
     @Bean
-    @Primary
-    public TagRepository tagRepository() {
-        return mock(TagRepository.class);
+    public TagService tagService() {
+        return mock(TagService.class);
+    }
+
+    @Bean
+    public PostTagService postTagService() {
+        return mock(PostTagService.class);
+    }
+
+    @Bean
+    public PostMapper postMapper() {
+        return mock(PostMapper.class);
     }
 }
