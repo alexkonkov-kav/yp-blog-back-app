@@ -1,13 +1,11 @@
 package com.blog.controller;
 
+import com.blog.dto.post.CreatePostRequestDto;
 import com.blog.dto.post.PostResponseDto;
 import com.blog.service.PostService;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/posts")
@@ -19,9 +17,15 @@ public class PostController {
         this.postService = postService;
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<PostResponseDto> getPost(@PathVariable("id") Long id) {
-        PostResponseDto response = postService.findById(id);
-        return new ResponseEntity<>(response, HttpStatus.OK);
+    @GetMapping(path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseStatus(HttpStatus.OK)
+    public PostResponseDto getPost(@PathVariable("id") Long id) {
+        return postService.findById(id);
+    }
+
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseStatus(HttpStatus.CREATED)
+    public PostResponseDto save(@RequestBody CreatePostRequestDto request) {
+        return postService.savePost(request);
     }
 }

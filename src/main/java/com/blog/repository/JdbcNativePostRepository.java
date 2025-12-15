@@ -2,8 +2,12 @@ package com.blog.repository;
 
 import com.blog.model.Post;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
+import java.sql.PreparedStatement;
+import java.sql.Statement;
 import java.util.List;
 import java.util.Optional;
 
@@ -14,6 +18,23 @@ public class JdbcNativePostRepository implements PostRepository {
 
     public JdbcNativePostRepository(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
+    }
+
+    @Override
+    public Post save(Post post) {
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        jdbcTemplate.update(e -> {
+            PreparedStatement ps = e.prepareStatement(
+                    "insert into post(title, text) values (?, ?)",
+                    Statement.RETURN_GENERATED_KEYS);
+            ps.setString(1, post.getTitle());
+            ps.setString(2, post.getText());
+            return ps;
+        }, keyHolder);
+        if (keyHolder.getKey() != null) {
+            post.setId(keyHolder.getKey().longValue());
+        }
+        return post;
     }
 
     @Override

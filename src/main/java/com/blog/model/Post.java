@@ -20,6 +20,11 @@ public class Post {
     public Post() {
     }
 
+    public Post(String title, String text) {
+        this.title = title;
+        this.text = text;
+    }
+
     public Post(Long id, String title, String text) {
         this.id = id;
         this.title = title;

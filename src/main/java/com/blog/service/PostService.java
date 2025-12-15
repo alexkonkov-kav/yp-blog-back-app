@@ -1,41 +1,47 @@
 package com.blog.service;
 
+import com.blog.dto.post.CreatePostRequestDto;
 import com.blog.dto.post.PostResponseDto;
+import com.blog.mapper.PostMapper;
 import com.blog.model.Post;
 import com.blog.model.Tag;
 import com.blog.repository.PostRepository;
-import com.blog.repository.TagRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.util.List;
 
 @Service
 public class PostService {
 
     private final PostRepository postRepository;
-    private final TagRepository tagRepository;
+    private final TagService tagService;
+    private final PostTagService postTagService;
+    private final PostMapper postMapper;
 
     public PostService(PostRepository postRepository,
-                       TagRepository tagRepository) {
+                       TagService tagService,
+                       PostTagService postTagService,
+                       PostMapper postMapper) {
         this.postRepository = postRepository;
-        this.tagRepository = tagRepository;
+        this.tagService = tagService;
+        this.postTagService = postTagService;
+        this.postMapper = postMapper;
     }
 
     public PostResponseDto findById(Long id) {
         Post post = postRepository.findById(id).orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Post with id: " + id + " not found"));
-        post.setTags(tagRepository.findByPostId(id));
-        return mapToResponseDto(post);
+        post.setTags(tagService.findByPostId(id));
+        return postMapper.mapToResponseDto(post);
     }
 
-    private PostResponseDto mapToResponseDto(Post post) {
-        PostResponseDto postResponseDto = new PostResponseDto();
-        postResponseDto.setId(post.getId());
-        postResponseDto.setTitle(post.getTitle());
-        postResponseDto.setText(post.getText());
-        postResponseDto.setTags(post.getTags().stream().map(Tag::getName).toList());
-        postResponseDto.setLikesCount(post.getLikesCount());
-        postResponseDto.setCommentsCount(post.getCommentsCount());
-        return postResponseDto;
+    public PostResponseDto savePost(CreatePostRequestDto request) {
+        Post post = postRepository.save(new Post(request.title(), request.text()));
+        List<Tag> tags = tagService.findOrSaveTags(request.tags());
+        post.setTags(tags);
+        postTagService.saveLinkPostTag(post);
+        return postMapper.mapToResponseDto(post);
     }
 }
