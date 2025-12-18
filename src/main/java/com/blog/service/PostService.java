@@ -2,6 +2,7 @@ package com.blog.service;
 
 import com.blog.dto.post.CreatePostRequestDto;
 import com.blog.dto.post.PostResponseDto;
+import com.blog.dto.post.UpdatePostRequestDto;
 import com.blog.mapper.PostMapper;
 import com.blog.model.Post;
 import com.blog.model.Tag;
@@ -40,6 +41,18 @@ public class PostService {
     public PostResponseDto savePost(CreatePostRequestDto request) {
         Post post = postRepository.save(new Post(request.title(), request.text()));
         List<Tag> tags = tagService.findOrSaveTags(request.tags());
+        post.setTags(tags);
+        postTagService.saveLinkPostTag(post);
+        return postMapper.mapToResponseDto(post);
+    }
+
+    public PostResponseDto updatePost(UpdatePostRequestDto request) {
+        List<Tag> tags = tagService.findOrSaveTags(request.getTags());
+        Post post = postRepository.findById(request.getId()).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Post with id: " + request.getId() + "not found"));
+        post.setTitle(request.getTitle());
+        post.setText(request.getText());
+        postRepository.update(post);
         post.setTags(tags);
         postTagService.saveLinkPostTag(post);
         return postMapper.mapToResponseDto(post);

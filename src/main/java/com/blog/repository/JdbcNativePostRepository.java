@@ -52,4 +52,10 @@ public class JdbcNativePostRepository implements PostRepository {
                         }, id);
         return posts.isEmpty() ? Optional.empty() : Optional.of(posts.getFirst());
     }
+
+    @Override
+    public void update(Post post) {
+        jdbcTemplate.update("update post set title = ?, text = ? where id = ?",
+                post.getTitle(), post.getText(), post.getId());
+    }
 }

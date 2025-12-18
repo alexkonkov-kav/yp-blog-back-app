@@ -2,6 +2,7 @@ package com.blog.controller;
 
 import com.blog.dto.post.CreatePostRequestDto;
 import com.blog.dto.post.PostResponseDto;
+import com.blog.dto.post.UpdatePostRequestDto;
 import com.blog.service.PostService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -27,5 +28,12 @@ public class PostController {
     @ResponseStatus(HttpStatus.CREATED)
     public PostResponseDto save(@RequestBody CreatePostRequestDto request) {
         return postService.savePost(request);
+    }
+
+    @PutMapping(path = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseStatus(HttpStatus.OK)
+    public PostResponseDto update(@PathVariable("id") Long id, @RequestBody UpdatePostRequestDto request) {
+        request.setId(id);
+        return postService.updatePost(request);
     }
 }

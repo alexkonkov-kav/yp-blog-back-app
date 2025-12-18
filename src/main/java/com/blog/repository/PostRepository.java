@@ -9,4 +9,6 @@ public interface PostRepository {
     Post save(Post post);
 
     Optional<Post> findById(Long id);
+
+    void update(Post post);
 }
