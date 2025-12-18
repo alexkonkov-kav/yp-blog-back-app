@@ -42,21 +42,23 @@ public class PostControllerIntegrationTest {
         jdbcTemplate.execute("DELETE FROM post");
         jdbcTemplate.execute("DELETE FROM tag");
         jdbcTemplate.execute("DELETE FROM post_tag");
+        jdbcTemplate.execute("ALTER TABLE post ALTER COLUMN id RESTART WITH 1");
+        jdbcTemplate.execute("ALTER TABLE tag ALTER COLUMN id RESTART WITH 1");
         jdbcTemplate.execute("""
-                    INSERT INTO post (id, title, text)
-                    VALUES (1,'Test title 1','Test text 1')
+                    INSERT INTO post (title, text)
+                    VALUES ('Test title 1','Test text 1')
                 """);
         jdbcTemplate.execute("""
-                    INSERT INTO post (id, title, text)
-                    VALUES (2,'Test title 2','Test text 2')
+                    INSERT INTO post (title, text)
+                    VALUES ('Test title 2','Test text 2')
                 """);
         jdbcTemplate.execute("""
-                    INSERT INTO tag (id, name)
-                    VALUES (1,'Test name 1')
+                    INSERT INTO tag (name)
+                    VALUES ('Test name 1')
                 """);
         jdbcTemplate.execute("""
-                    INSERT INTO tag (id, name)
-                    VALUES (2,'Test name 2')
+                    INSERT INTO tag (name)
+                    VALUES ('Test name 2')
                 """);
         jdbcTemplate.execute("""
                     INSERT INTO post_tag (post_id, tag_id)
@@ -84,9 +86,6 @@ public class PostControllerIntegrationTest {
 
     @Test
     void savePost() throws Exception {
-        jdbcTemplate.execute("DELETE FROM post");
-        jdbcTemplate.execute("DELETE FROM tag");
-        jdbcTemplate.execute("DELETE FROM post_tag");
         String json = """
                 {"title":"Название поста 3","text":"Текст поста в формате Markdown...","tags":["tag_1", "tag_2"]}
                 """;
