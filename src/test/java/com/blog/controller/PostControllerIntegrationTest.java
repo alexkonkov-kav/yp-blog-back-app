@@ -14,9 +14,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringJUnitWebConfig({
@@ -80,5 +80,26 @@ public class PostControllerIntegrationTest {
                 .andExpect(jsonPath("$.tags", contains("Test name 1", "Test name 2")))
                 .andExpect(jsonPath("$.likesCount").value("0"))
                 .andExpect(jsonPath("$.commentsCount").value("0"));
+    }
+
+    @Test
+    void savePost() throws Exception {
+        jdbcTemplate.execute("DELETE FROM post");
+        jdbcTemplate.execute("DELETE FROM tag");
+        jdbcTemplate.execute("DELETE FROM post_tag");
+        String json = """
+                {"title":"Название поста 3","text":"Текст поста в формате Markdown...","tags":["tag_1", "tag_2"]}
+                """;
+
+        mockMvc.perform(post("/api/posts")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isCreated())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.id").exists())
+                .andExpect(jsonPath("$.title").value("Название поста 3"))
+                .andExpect(jsonPath("$.text").value("Текст поста в формате Markdown..."))
+                .andExpect(jsonPath("$.tags", hasSize(2)))
+                .andExpect(jsonPath("$.tags", containsInAnyOrder("tag_1", "tag_2")));
     }
 }
