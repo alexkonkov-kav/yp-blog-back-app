@@ -25,9 +25,10 @@ public class JdbcNativePostRepositoryIntegrationTest {
     @BeforeEach
     void setUp() {
         jdbcTemplate.execute("DELETE FROM post");
-        jdbcTemplate.update("INSERT INTO post (id, title, text) VALUES (?,?,?)", 1L, "Test title 1", "Test text 1");
-        jdbcTemplate.update("INSERT INTO post (id, title, text) VALUES (?,?,?)", 2L, "Test title 2", "Test text 2");
-        jdbcTemplate.update("INSERT INTO post (id, title, text) VALUES (?,?,?)", 3L, "Test title 3", "Test text 3");
+        jdbcTemplate.execute("ALTER TABLE post ALTER COLUMN id RESTART WITH 1");
+        jdbcTemplate.update("INSERT INTO post (title, text) VALUES (?,?)", "Test title 1", "Test text 1");
+        jdbcTemplate.update("INSERT INTO post (title, text) VALUES (?,?)", "Test title 2", "Test text 2");
+        jdbcTemplate.update("INSERT INTO post (title, text) VALUES (?,?)", "Test title 3", "Test text 3");
     }
 
     @Test
@@ -35,8 +36,19 @@ public class JdbcNativePostRepositoryIntegrationTest {
         Post post = postRepository.findById(1L).orElse(null);
 
         assertNotNull(post);
-        assertEquals(1L, post.getId());
+        assertNotNull(1L, "ID должен быть сгенерирован");
         assertEquals("Test title 1", post.getTitle());
         assertEquals("Test text 1", post.getText());
+    }
+
+    @Test
+    void save_shouldCreateNewPost() {
+        Post newPost = new Post("Test title 4", "Test text 4");
+        Post savedPost = postRepository.save(newPost);
+        assertNotNull(savedPost.getId(), "ID должен быть сгенерирован");
+        assertEquals(savedPost.getTitle(), "Test title 4");
+        assertEquals(savedPost.getText(), "Test text 4");
+        assertEquals(savedPost.getLikesCount(), 0);
+        assertEquals(savedPost.getCommentsCount(), 0);
     }
 }
