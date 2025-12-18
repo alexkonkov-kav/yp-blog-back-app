@@ -51,4 +51,19 @@ public class JdbcNativePostRepositoryIntegrationTest {
         assertEquals(savedPost.getLikesCount(), 0);
         assertEquals(savedPost.getCommentsCount(), 0);
     }
+
+    @Test
+    void update_shouldModifyExistingPost() {
+        Post existingPost = postRepository.findById(1L)
+                .orElseThrow(() -> new AssertionError("Post with id: 1 not found"));
+        existingPost.setTitle("Update Title");
+        existingPost.setText("Update text");
+        postRepository.update(existingPost);
+        Post updatedPost = postRepository.findById(1L)
+                .orElseThrow(() -> new AssertionError("Post with id: 1 not found after update"));
+        assertEquals("Update Title", updatedPost.getTitle());
+        assertEquals("Update text", updatedPost.getText());
+        assertEquals(1L, updatedPost.getId());
+        assertEquals(0, updatedPost.getLikesCount());
+    }
 }

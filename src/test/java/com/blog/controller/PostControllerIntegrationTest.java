@@ -15,8 +15,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import static org.hamcrest.Matchers.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringJUnitWebConfig({
@@ -100,5 +99,24 @@ public class PostControllerIntegrationTest {
                 .andExpect(jsonPath("$.text").value("Текст поста в формате Markdown..."))
                 .andExpect(jsonPath("$.tags", hasSize(2)))
                 .andExpect(jsonPath("$.tags", containsInAnyOrder("tag_1", "tag_2")));
+    }
+
+    @Test
+    void updatePost() throws Exception {
+        String json = """
+                {"id":2,"title":"Название поста 3","text":"Текст поста в формате Markdown...","tags":["tag_1", "tag_2"]}
+                """;
+
+        mockMvc.perform(put("/api/posts/{id}", 2L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.id").value(2))
+                .andExpect(jsonPath("$.title").value("Название поста 3"))
+                .andExpect(jsonPath("$.text").value("Текст поста в формате Markdown..."))
+                .andExpect(jsonPath("$.tags", hasSize(2)))
+                .andExpect(jsonPath("$.tags", containsInAnyOrder("tag_1", "tag_2")));
+
     }
 }
