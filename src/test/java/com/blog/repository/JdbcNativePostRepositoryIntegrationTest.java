@@ -9,8 +9,9 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringJUnitConfig(classes = {DataSourceConfig.class, JdbcNativePostRepository.class})
 @TestPropertySource(locations = "classpath:application.properties")
@@ -65,5 +66,12 @@ public class JdbcNativePostRepositoryIntegrationTest {
         assertEquals("Update text", updatedPost.getText());
         assertEquals(1L, updatedPost.getId());
         assertEquals(0, updatedPost.getLikesCount());
+    }
+
+    @Test
+    void deleteById_shouldRemovePostAndPostTagFromDatabase() {
+        postRepository.deleteById(1L);
+        Optional<Post> deletedPost = postRepository.findById(1L);
+        assertFalse(deletedPost.isPresent(), "Post with id: 1 not found");
     }
 }

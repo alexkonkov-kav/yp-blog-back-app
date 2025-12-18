@@ -15,6 +15,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import static org.hamcrest.Matchers.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -118,5 +119,14 @@ public class PostControllerIntegrationTest {
                 .andExpect(jsonPath("$.tags", hasSize(2)))
                 .andExpect(jsonPath("$.tags", containsInAnyOrder("tag_1", "tag_2")));
 
+    }
+
+    @Test
+    void deletePost() throws Exception {
+        mockMvc.perform(delete("/api/posts/1"))
+                .andExpect(status().isOk());
+        Integer tagsLinkCount = jdbcTemplate.queryForObject(
+                "SELECT count(*) FROM post_tag WHERE post_id = 1", Integer.class);
+        assertEquals(0, tagsLinkCount, "Связи Post_Tag должны быть удалены каскадно");
     }
 }
