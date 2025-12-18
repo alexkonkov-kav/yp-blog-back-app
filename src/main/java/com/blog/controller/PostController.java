@@ -36,4 +36,10 @@ public class PostController {
         request.setId(id);
         return postService.updatePost(request);
     }
+
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    public void delete(@PathVariable("id") Long id) {
+        postService.deleteById(id);
+    }
 }

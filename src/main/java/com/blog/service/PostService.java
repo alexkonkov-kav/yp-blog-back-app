@@ -57,4 +57,8 @@ public class PostService {
         postTagService.saveLinkPostTag(post);
         return postMapper.mapToResponseDto(post);
     }
+
+    public void deleteById(Long postId) {
+        postRepository.deleteById(postId);
+    }
 }
