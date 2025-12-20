@@ -80,4 +80,13 @@ public class JdbcNativePostRepository implements PostRepository {
         int updated = jdbcTemplate.update("update post set image=? where id=?", image, id);
         return updated > 0;
     }
+
+    @Override
+    public byte[] findImageById(Long id) {
+        return jdbcTemplate.query(
+                "select image from post where id=?",
+                rs -> rs.setLong(1, id),
+                resultSet -> resultSet.next() ? resultSet.getBytes("image") : null
+        );
+    }
 }

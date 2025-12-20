@@ -4,6 +4,7 @@ import com.blog.dto.post.CreatePostRequestDto;
 import com.blog.dto.post.PostResponseDto;
 import com.blog.dto.post.UpdatePostRequestDto;
 import com.blog.service.PostService;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -24,6 +25,21 @@ public class PostController {
     @ResponseStatus(HttpStatus.OK)
     public PostResponseDto getPost(@PathVariable("id") Long id) {
         return postService.findById(id);
+    }
+
+    @GetMapping(path = "/{id}/image", produces = MediaType.IMAGE_PNG_VALUE)
+    public ResponseEntity<byte[]> getPostImage(@PathVariable("id") Long id) {
+        if (!postService.existsPostById(id)) {
+            return ResponseEntity.notFound().build();
+        }
+        byte[] bytes = postService.getImageByPostId(id);
+        if (bytes == null || bytes.length == 0) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok()
+                .contentType(MediaType.IMAGE_PNG)
+                .header(HttpHeaders.CACHE_CONTROL, "no-store")
+                .body(bytes);
     }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)

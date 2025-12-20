@@ -19,4 +19,6 @@ public interface PostRepository {
     boolean existsById(Long id);
 
     boolean updateImage(Long id, byte[] image);
+
+    byte[] findImageById(Long id);
 }

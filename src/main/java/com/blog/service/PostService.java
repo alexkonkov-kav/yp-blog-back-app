@@ -76,4 +76,8 @@ public class PostService {
     public boolean updateImage(Long id, byte[] image) {
         return postRepository.updateImage(id, image);
     }
+
+    public byte[] getImageByPostId(Long id) {
+        return postRepository.findImageById(id);
+    }
 }
