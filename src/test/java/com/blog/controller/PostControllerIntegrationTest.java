@@ -41,9 +41,11 @@ public class PostControllerIntegrationTest {
         mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
 
         jdbcTemplate.execute("DELETE FROM post");
+        jdbcTemplate.execute("DELETE FROM comment");
         jdbcTemplate.execute("DELETE FROM tag");
         jdbcTemplate.execute("DELETE FROM post_tag");
         jdbcTemplate.execute("ALTER TABLE post ALTER COLUMN id RESTART WITH 1");
+        jdbcTemplate.execute("ALTER TABLE comment ALTER COLUMN id RESTART WITH 1");
         jdbcTemplate.execute("ALTER TABLE tag ALTER COLUMN id RESTART WITH 1");
         jdbcTemplate.execute("""
                     INSERT INTO post (title, text)
@@ -68,6 +70,14 @@ public class PostControllerIntegrationTest {
         jdbcTemplate.execute("""
                     INSERT INTO post_tag (post_id, tag_id)
                     VALUES (1,2)
+                """);
+        jdbcTemplate.execute("""
+                    INSERT INTO comment (text, post_id)
+                    VALUES ('Test comment name 1',1)
+                """);
+        jdbcTemplate.execute("""
+                    INSERT INTO comment (text, post_id)
+                    VALUES ('Test comment name 2',1)
                 """);
     }
 
@@ -184,5 +194,15 @@ public class PostControllerIntegrationTest {
     void getImage_postNotFound_404() throws Exception {
         mockMvc.perform(get("/api/posts/{id}/image", 777L))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void getCommentsByPostId_returnsJsonArray() throws Exception {
+        mockMvc.perform(get("/api/posts/{id}/comments", 1L))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$", hasSize(2)))
+                .andExpect(jsonPath("$[0].text").value("Test comment name 1"))
+                .andExpect(jsonPath("$[1].text").value("Test comment name 2"));
     }
 }

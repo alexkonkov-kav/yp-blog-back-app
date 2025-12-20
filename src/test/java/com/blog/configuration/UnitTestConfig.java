@@ -1,7 +1,9 @@
 package com.blog.configuration;
 
 import com.blog.mapper.PostMapper;
+import com.blog.repository.CommentRepository;
 import com.blog.repository.PostRepository;
+import com.blog.service.CommentService;
 import com.blog.service.PostService;
 import com.blog.service.PostTagService;
 import com.blog.service.TagService;
@@ -24,6 +26,11 @@ public class UnitTestConfig {
     }
 
     @Bean
+    public CommentService commentService(CommentRepository commentRepository) {
+        return new CommentService(commentRepository);
+    }
+
+    @Bean
     public PostRepository postRepository() {
         return mock(PostRepository.class);
     }
@@ -41,5 +48,10 @@ public class UnitTestConfig {
     @Bean
     public PostMapper postMapper() {
         return mock(PostMapper.class);
+    }
+
+    @Bean
+    public CommentRepository commentRepository() {
+        return mock(CommentRepository.class);
     }
 }
