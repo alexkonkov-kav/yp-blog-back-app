@@ -58,6 +58,13 @@ public class PostService {
         return postMapper.mapToResponseDto(post);
     }
 
+    public Integer incrementLikesCount(Long id) {
+        Post post = postRepository.findById(id).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Post with id: " + id + "not found"));
+        postRepository.incrementLikesCount(id);
+        return post.getLikesCount() + 1;
+    }
+
     public void deleteById(Long postId) {
         postRepository.deleteById(postId);
     }

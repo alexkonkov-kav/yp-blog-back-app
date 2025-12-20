@@ -13,4 +13,6 @@ public interface PostRepository {
     void update(Post post);
 
     void deleteById(Long id);
+
+    void incrementLikesCount(Long id);
 }

@@ -30,6 +30,12 @@ public class PostController {
         return postService.savePost(request);
     }
 
+    @PostMapping(path = "/{id}/likes", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseStatus(HttpStatus.OK)
+    public Integer updateLike(@PathVariable("id") Long id) {
+        return postService.incrementLikesCount(id);
+    }
+
     @PutMapping(path = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
     public PostResponseDto update(@PathVariable("id") Long id, @RequestBody UpdatePostRequestDto request) {

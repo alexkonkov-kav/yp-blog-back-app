@@ -63,4 +63,9 @@ public class JdbcNativePostRepository implements PostRepository {
     public void deleteById(Long id) {
         jdbcTemplate.update("delete from post where id = ?", id);
     }
+
+    @Override
+    public void incrementLikesCount(Long id) {
+        jdbcTemplate.update("update post set likes_count = likes_count + 1 where id = ?", id);
+    }
 }
