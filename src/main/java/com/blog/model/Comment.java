@@ -11,6 +11,11 @@ public class Comment {
     public Comment() {
     }
 
+    public Comment(String text, Post post) {
+        this.text = text;
+        this.post = post;
+    }
+
     public Long getId() {
         return id;
     }

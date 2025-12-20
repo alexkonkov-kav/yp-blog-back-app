@@ -89,4 +89,9 @@ public class JdbcNativePostRepository implements PostRepository {
                 resultSet -> resultSet.next() ? resultSet.getBytes("image") : null
         );
     }
+
+    @Override
+    public void incrementCommentsCount(Long id) {
+        jdbcTemplate.update("update post set comments_count = comments_count + 1 where id = ?", id);
+    }
 }

@@ -21,4 +21,6 @@ public interface PostRepository {
     boolean updateImage(Long id, byte[] image);
 
     byte[] findImageById(Long id);
+
+    void incrementCommentsCount(Long id);
 }

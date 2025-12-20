@@ -1,10 +1,12 @@
 package com.blog.controller;
 
 import com.blog.dto.comment.CommentResponseDto;
+import com.blog.dto.comment.CreateCommentRequestDto;
 import com.blog.dto.post.CreatePostRequestDto;
 import com.blog.dto.post.PostResponseDto;
 import com.blog.dto.post.UpdatePostRequestDto;
 import com.blog.service.CommentService;
+import com.blog.service.PostCommentService;
 import com.blog.service.PostService;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -22,11 +24,14 @@ public class PostController {
 
     private final PostService postService;
     private final CommentService commentService;
+    private final PostCommentService postCommentService;
 
     public PostController(PostService postService,
-                          CommentService commentService) {
+                          CommentService commentService,
+                          PostCommentService postCommentService) {
         this.postService = postService;
         this.commentService = commentService;
+        this.postCommentService = postCommentService;
     }
 
     @GetMapping(path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -74,6 +79,12 @@ public class PostController {
     @ResponseStatus(HttpStatus.OK)
     public Integer updateLike(@PathVariable("id") Long id) {
         return postService.incrementLikesCount(id);
+    }
+
+    @PostMapping(path = "/{postId}/comments", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseStatus(HttpStatus.CREATED)
+    public CommentResponseDto addCommentToPost(@PathVariable("postId") Long postId, @RequestBody CreateCommentRequestDto request) {
+        return postCommentService.addCommentToPost(postId, request);
     }
 
     @PutMapping(path = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
