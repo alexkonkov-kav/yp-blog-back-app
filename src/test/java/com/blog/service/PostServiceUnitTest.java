@@ -222,4 +222,32 @@ public class PostServiceUnitTest {
         postService.deleteById(postId);
         verify(postRepository, times(1)).deleteById(postId);
     }
+
+    @Test
+    void testExistsPostById_True() {
+        Long postId = 1L;
+        when(postRepository.existsById(postId)).thenReturn(true);
+        boolean exists = postService.existsPostById(postId);
+        assertTrue(exists, "Post with id: " + postId + " is found");
+        verify(postRepository, times(1)).existsById(postId);
+    }
+
+    @Test
+    void testExistsPostById_False() {
+        Long postId = 999L;
+        when(postRepository.existsById(postId)).thenReturn(false);
+        boolean exists = postService.existsPostById(postId);
+        assertFalse(exists, "Post with id: " + postId + " not found");
+        verify(postRepository, times(1)).existsById(postId);
+    }
+
+    @Test
+    void testUpdateImage_Success() {
+        Long postId = 1L;
+        byte[] imageContent = new byte[]{1, 2, 3, 4};
+        when(postRepository.updateImage(postId, imageContent)).thenReturn(true);
+        boolean result = postService.updateImage(postId, imageContent);
+        assertTrue(result, "Image is updated");
+        verify(postRepository, times(1)).updateImage(postId, imageContent);
+    }
 }

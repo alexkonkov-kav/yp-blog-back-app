@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.web.SpringJUnitWebConfig;
 import org.springframework.test.context.web.WebAppConfiguration;
@@ -128,5 +129,42 @@ public class PostControllerIntegrationTest {
         Integer tagsLinkCount = jdbcTemplate.queryForObject(
                 "SELECT count(*) FROM post_tag WHERE post_id = 1", Integer.class);
         assertEquals(0, tagsLinkCount, "Связи Post_Tag должны быть удалены каскадно");
+    }
+
+    @Test
+    void uploadAndDownloadImage_success() throws Exception {
+        byte[] pngStub = new byte[]{(byte) 137, 80, 78, 71};
+        MockMultipartFile file = new MockMultipartFile("image", "image.png", "image/png", pngStub);
+
+        mockMvc.perform(multipart("/api/posts/{id}/image", 1L).file(file).with(request -> {
+                    request.setMethod("PUT");
+                    return request;
+                }))
+                .andExpect(status().isCreated())
+                .andExpect(content().string("ok"));
+    }
+
+    @Test
+    void uploadImage_emptyFile_badRequest() throws Exception {
+        MockMultipartFile empty = new MockMultipartFile("image", "image.png", "image/png", new byte[0]);
+
+        mockMvc.perform(multipart("/api/posts/{id}/image", 1L).file(empty).with(request -> {
+                    request.setMethod("PUT");
+                    return request;
+                }))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string("empty image"));
+    }
+
+    @Test
+    void uploadImage_postNotFound_404() throws Exception {
+        MockMultipartFile file = new MockMultipartFile("image", "image.png", "image/png", new byte[]{1, 2, 3});
+
+        mockMvc.perform(multipart("/api/posts/{id}/image", 999L).file(file).with(request -> {
+                    request.setMethod("PUT");
+                    return request;
+                }))
+                .andExpect(status().isNotFound())
+                .andExpect(content().string("post not found"));
     }
 }

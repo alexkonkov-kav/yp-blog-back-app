@@ -74,4 +74,16 @@ public class JdbcNativePostRepositoryIntegrationTest {
         Optional<Post> deletedPost = postRepository.findById(1L);
         assertFalse(deletedPost.isPresent(), "Post with id: 1 not found");
     }
+
+    @Test
+    void updateImage() {
+        byte[] image = new byte[]{1, 2, 3, 4};
+        assertTrue(postRepository.updateImage(1L, image));
+    }
+
+    @Test
+    void existsById_true_and_false() {
+        assertTrue(postRepository.existsById(1L));
+        assertFalse(postRepository.existsById(999L));
+    }
 }
