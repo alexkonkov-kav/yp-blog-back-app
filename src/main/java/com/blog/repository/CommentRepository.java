@@ -14,4 +14,6 @@ public interface CommentRepository {
     Optional<Comment> findByIdAndPostId(Long id, Long postId);
 
     void update(Comment comment);
+
+    void deleteByIdAndPostId(Long id, Long postId);
 }

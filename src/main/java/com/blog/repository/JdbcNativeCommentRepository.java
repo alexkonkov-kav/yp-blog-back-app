@@ -67,4 +67,9 @@ public class JdbcNativeCommentRepository implements CommentRepository {
         jdbcTemplate.update("update comment set text = ? where id = ?",
                 comment.getText(), comment.getId());
     }
+
+    @Override
+    public void deleteByIdAndPostId(Long id, Long postId) {
+        jdbcTemplate.update("delete from comment where id = ? and post_id = ?", id, postId);
+    }
 }

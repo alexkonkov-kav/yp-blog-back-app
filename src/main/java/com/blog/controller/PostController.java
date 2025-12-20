@@ -125,4 +125,10 @@ public class PostController {
     public void delete(@PathVariable("id") Long id) {
         postService.deleteById(id);
     }
+
+    @DeleteMapping("/{postId}/comments/{commentId}")
+    @ResponseStatus(HttpStatus.OK)
+    public void deleteComment(@PathVariable("postId") Long postId, @PathVariable("commentId") Long commentId) {
+        commentService.deleteCommentByIdAndPostId(commentId, postId);
+    }
 }
