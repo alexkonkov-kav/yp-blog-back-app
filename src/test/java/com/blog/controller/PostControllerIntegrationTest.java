@@ -260,4 +260,18 @@ public class PostControllerIntegrationTest {
                         .content(json))
                 .andExpect(status().isNotFound());
     }
+
+    @Test
+    void deleteComment() throws Exception {
+        Long postId = 1L;
+        Long commentId = 2L;
+        Integer beforeDeleteCount = jdbcTemplate.queryForObject(
+                "SELECT count(*) FROM comment WHERE id = ? AND post_id = ?", Integer.class, commentId, postId);
+        assertEquals(1, beforeDeleteCount);
+        mockMvc.perform(delete("/api/posts/{postId}/comments/{commentId}", 1L, 2L))
+                .andExpect(status().isOk());
+        Integer afterDeleteCount = jdbcTemplate.queryForObject(
+                "SELECT count(*) FROM comment WHERE id = ? AND post_id = ?", Integer.class, commentId, postId);
+        assertEquals(0, afterDeleteCount, "Комментарий должен быть удален");
+    }
 }

@@ -88,4 +88,17 @@ public class JdbcNativeCommentRepositoryIntegrationTest {
                 .orElseThrow(() -> new AssertionError("Comment with id: 1 not found"));
         assertEquals("Второй комментарий к посту 1", uodateComment.getText());
     }
+
+    @Test
+    void deleteByIdAndPostId_shouldDeleteComment_WhenBothIdsMatch() {
+        Long postId = 1L;
+        Long commentId = 2L;
+        Integer beforeDeleteCount = jdbcTemplate.queryForObject(
+                "SELECT count(*) FROM comment WHERE id = ? AND post_id = ?", Integer.class, commentId, postId);
+        assertEquals(1, beforeDeleteCount);
+        commentRepository.deleteByIdAndPostId(commentId, postId);
+        Integer afterDeleteCount = jdbcTemplate.queryForObject(
+                "SELECT count(*) FROM comment WHERE id = ? AND post_id = ?", Integer.class, commentId, postId);
+        assertEquals(0, afterDeleteCount, "Комментарий должен быть удален");
+    }
 }
