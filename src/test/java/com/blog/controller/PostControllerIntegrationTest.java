@@ -142,6 +142,12 @@ public class PostControllerIntegrationTest {
                 }))
                 .andExpect(status().isCreated())
                 .andExpect(content().string("ok"));
+
+        mockMvc.perform(get("/api/posts/{id}/image", 1L))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.IMAGE_PNG))
+                .andExpect(header().string("Cache-Control", "no-store"))
+                .andExpect(content().bytes(pngStub));
     }
 
     @Test
@@ -166,5 +172,17 @@ public class PostControllerIntegrationTest {
                 }))
                 .andExpect(status().isNotFound())
                 .andExpect(content().string("post not found"));
+    }
+
+    @Test
+    void getImage_postHasNoImage_404() throws Exception {
+        mockMvc.perform(get("/api/posts/{id}/image", 2L))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void getImage_postNotFound_404() throws Exception {
+        mockMvc.perform(get("/api/posts/{id}/image", 777L))
+                .andExpect(status().isNotFound());
     }
 }

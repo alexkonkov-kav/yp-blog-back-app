@@ -86,4 +86,9 @@ public class JdbcNativePostRepositoryIntegrationTest {
         assertTrue(postRepository.existsById(1L));
         assertFalse(postRepository.existsById(999L));
     }
+
+    @Test
+    void findImageById_returnsNull_whenNotSet() {
+        assertNull(postRepository.findImageById(2L));
+    }
 }

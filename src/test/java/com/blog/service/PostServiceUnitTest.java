@@ -250,4 +250,26 @@ public class PostServiceUnitTest {
         assertTrue(result, "Image is updated");
         verify(postRepository, times(1)).updateImage(postId, imageContent);
     }
+
+    @Test
+    void testGetImageByPostId_Success() {
+        Long postId = 1L;
+        byte[] expectedImage = new byte[]{(byte) 137, 80, 78, 71}; // Stub PNG header
+        when(postRepository.findImageById(postId)).thenReturn(expectedImage);
+        byte[] resultImage = postService.getImageByPostId(postId);
+
+        assertNotNull(resultImage, "Массив байтов не должен быть null");
+        assertArrayEquals(expectedImage, resultImage, "Массив байт должен совпадать");
+        verify(postRepository, times(1)).findImageById(postId);
+    }
+
+    @Test
+    void testGetImageByPostId_NotFound() {
+        Long postId = 999L;
+        when(postRepository.findImageById(postId)).thenReturn(null);
+        byte[] resultImage = postService.getImageByPostId(postId);
+
+        assertNull(resultImage, "Метод должен вернуть null");
+        verify(postRepository, times(1)).findImageById(postId);
+    }
 }
