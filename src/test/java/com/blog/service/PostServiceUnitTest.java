@@ -3,6 +3,7 @@ package com.blog.service;
 import com.blog.configuration.UnitTestConfig;
 import com.blog.dto.post.CreatePostRequestDto;
 import com.blog.dto.post.PostResponseDto;
+import com.blog.dto.post.UpdatePostRequestDto;
 import com.blog.mapper.PostMapper;
 import com.blog.model.Post;
 import com.blog.model.Tag;
@@ -19,6 +20,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -137,5 +139,87 @@ public class PostServiceUnitTest {
         verify(tagService, times(1)).findOrSaveTags(anyList());
         verify(postTagService, never()).saveLinkPostTag(any(Post.class));
         verify(postMapper, never()).mapToResponseDto(any(Post.class));
+    }
+
+    @Test
+    void testUpdatePost_Success() {
+        Long postId = 1L;
+        List<String> newTagNames = List.of("tag_1", "tag_2");
+        UpdatePostRequestDto requestDto = new UpdatePostRequestDto();
+        requestDto.setId(postId);
+        requestDto.setTitle("Название поста 1");
+        requestDto.setText("Текст поста в формате Markdown...");
+        requestDto.setTags(newTagNames);
+        Post existingPost = new Post(postId, "Old Title", "Old Text");
+        List<Tag> mockTags = List.of(new Tag(1L, "tag_1"), new Tag(2L, "tag_1"));
+        PostResponseDto responseDto = new PostResponseDto();
+        responseDto.setId(postId);
+        responseDto.setTitle(requestDto.getTitle());
+        responseDto.setText(requestDto.getText());
+        responseDto.setTags(newTagNames);
+
+        when(tagService.findOrSaveTags(newTagNames)).thenReturn(mockTags);
+        when(postRepository.findById(postId)).thenReturn(Optional.of(existingPost));
+        when(postMapper.mapToResponseDto(any(Post.class))).thenReturn(responseDto);
+        PostResponseDto resultDto = postService.updatePost(requestDto);
+        assertNotNull(resultDto);
+        assertEquals("Название поста 1", resultDto.getTitle());
+        verify(postRepository, times(1)).update(argThat(post ->
+                post.getId().equals(postId) &&
+                post.getTitle().equals(requestDto.getTitle()) &&
+                post.getText().equals(requestDto.getText())
+        ));
+
+        verify(tagService, times(1)).findOrSaveTags(newTagNames);
+        verify(postTagService, times(1)).saveLinkPostTag(any(Post.class));
+        verify(postMapper, times(1)).mapToResponseDto(any(Post.class));
+    }
+
+    @Test
+    void testUpdatePost_NotFound() {
+        Long postId = 999L;
+        UpdatePostRequestDto requestDto = new UpdatePostRequestDto();
+        requestDto.setId(postId);
+        requestDto.setTags(List.of("tag_1"));
+        when(tagService.findOrSaveTags(anyList())).thenReturn(Collections.emptyList());
+        when(postRepository.findById(postId)).thenReturn(Optional.empty());
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () ->
+                postService.updatePost(requestDto)
+        );
+        assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
+        verify(postRepository, never()).update(any());
+        verify(postTagService, never()).saveLinkPostTag(any());
+    }
+
+    @Test
+    void testIncrementLikesCount_Success() {
+        Long postId = 1L;
+        int currentLikes = 10;
+        Post mockPost = new Post(postId, "Название поста 1", "Текст поста в формате Markdown...");
+        mockPost.setLikesCount(currentLikes);
+        when(postRepository.findById(postId)).thenReturn(Optional.of(mockPost));
+        Integer newLikesCount = postService.incrementLikesCount(postId);
+        assertEquals(currentLikes + 1, newLikesCount, "Метод должен вернуть Инкремент числа лайков поста");
+        verify(postRepository, times(1)).findById(postId);
+        verify(postRepository, times(1)).incrementLikesCount(postId);
+    }
+
+    @Test
+    void testIncrementLikesCount_NotFound() {
+        Long postId = 999L;
+        when(postRepository.findById(postId)).thenReturn(Optional.empty());
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () ->
+                postService.incrementLikesCount(postId)
+        );
+        assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
+        verify(postRepository, times(1)).findById(postId);
+        verify(postRepository, never()).incrementLikesCount(anyLong());
+    }
+
+    @Test
+    void testDeleteById_Success() {
+        Long postId = 1L;
+        postService.deleteById(postId);
+        verify(postRepository, times(1)).deleteById(postId);
     }
 }
