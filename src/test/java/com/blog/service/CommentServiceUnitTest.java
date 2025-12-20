@@ -2,6 +2,7 @@ package com.blog.service;
 
 import com.blog.configuration.UnitTestConfig;
 import com.blog.dto.comment.CommentResponseDto;
+import com.blog.dto.comment.UpdateCommentRequestDto;
 import com.blog.mapper.CommentMapper;
 import com.blog.model.Comment;
 import com.blog.repository.CommentRepository;
@@ -102,6 +103,36 @@ public class CommentServiceUnitTest {
                 commentService.getCommentByCommentIdAndPostId(commentId, postId));
         assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
         assertTrue(Objects.requireNonNull(exception.getReason()).contains("not found for post id: " + postId));
+        verify(commentMapper, never()).mapToResponse(any(), anyLong());
+    }
+
+    @Test
+    void testUpdateComment_Success() {
+        Long postId = 1L;
+        UpdateCommentRequestDto requestDto = new UpdateCommentRequestDto(2L, "Второй комментарий к посту 1", postId);
+        Comment existingComment = new Comment();
+        existingComment.setId(requestDto.getId());
+        existingComment.setText("Старый текст");
+        CommentResponseDto expectedDto = new CommentResponseDto(existingComment.getId(), requestDto.getText(), postId);
+        when(commentRepository.findByIdAndPostId(existingComment.getId(), postId)).thenReturn(Optional.of(existingComment));
+        when(commentMapper.mapToResponse(existingComment, postId)).thenReturn(expectedDto);
+        CommentResponseDto resultDto = commentService.updateComment(postId, requestDto.getId(), requestDto);
+        assertNotNull(resultDto);
+        assertEquals(requestDto.getText(), resultDto.getText());
+        verify(commentRepository, times(1)).findByIdAndPostId(requestDto.getId(), postId);
+        verify(commentRepository, times(1)).update(existingComment);
+        verify(commentMapper, times(1)).mapToResponse(existingComment, postId);
+    }
+
+    @Test
+    void testUpdateComment_NotFound() {
+        Long postId = 1L;
+        UpdateCommentRequestDto requestDto = new UpdateCommentRequestDto(999L, "Второй комментарий к посту 1", postId);
+        when(commentRepository.findByIdAndPostId(requestDto.getId(), postId)).thenReturn(Optional.empty());
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () ->
+                commentService.updateComment(postId, requestDto.getId(), requestDto));
+        assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
+        verify(commentRepository, never()).update(any());
         verify(commentMapper, never()).mapToResponse(any(), anyLong());
     }
 }

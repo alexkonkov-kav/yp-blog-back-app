@@ -234,4 +234,30 @@ public class PostControllerIntegrationTest {
                 Integer.class, 1, "Комментарий к посту");
         assertEquals(1, commentsInDb, "Комментарий должен быть сохранен в таблице comment");
     }
+
+    @Test
+    void updateComment_success() throws Exception {
+        String json = """
+                {"id":"2","text":"Второй комментарий к посту 1","postId":"1"}
+                """;
+        mockMvc.perform(put("/api/posts/{postId}/comments/{commentId}", 1L, 2L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.id").value(2))
+                .andExpect(jsonPath("$.text").value("Второй комментарий к посту 1"))
+                .andExpect(jsonPath("$.postId").value(1));
+    }
+
+    @Test
+    void updateComment_postNotFound_404() throws Exception {
+        String json = """
+                {"id":"2","text":"Второй комментарий к посту 1","postId":"1"}
+                """;
+        mockMvc.perform(put("/api/posts/{postId}/comments/{commentId}", 999L, 2L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isNotFound());
+    }
 }

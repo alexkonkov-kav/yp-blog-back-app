@@ -77,4 +77,15 @@ public class JdbcNativeCommentRepositoryIntegrationTest {
         assertNotNull(savedComment.getId(), "ID должен быть сгенерирован");
         assertEquals(savedComment.getText(), "Комментарий к посту");
     }
+
+    @Test
+    void update_shouldModifyExistingComment() {
+        Comment findComment = commentRepository.findByIdAndPostId(1L, 1L)
+                .orElseThrow(() -> new AssertionError("Comment with id: 1 not found"));
+        findComment.setText("Второй комментарий к посту 1");
+        commentRepository.update(findComment);
+        Comment uodateComment = commentRepository.findByIdAndPostId(1L, 1L)
+                .orElseThrow(() -> new AssertionError("Comment with id: 1 not found"));
+        assertEquals("Второй комментарий к посту 1", uodateComment.getText());
+    }
 }
