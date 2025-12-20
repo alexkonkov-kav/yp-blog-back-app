@@ -4,7 +4,8 @@ CREATE TABLE IF NOT EXISTS post(
     title VARCHAR(255) NOT NULL,
     text TEXT,
     likes_count INT DEFAULT 0,
-    comments_count INT DEFAULT 0
+    comments_count INT DEFAULT 0,
+    image     BYTEA
     );
 
 -- Таблица Comment

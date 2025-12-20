@@ -68,4 +68,16 @@ public class JdbcNativePostRepository implements PostRepository {
     public void incrementLikesCount(Long id) {
         jdbcTemplate.update("update post set likes_count = likes_count + 1 where id = ?", id);
     }
+
+    @Override
+    public boolean existsById(Long id) {
+        Integer postCount = jdbcTemplate.queryForObject("select count(*) from post where id=?", Integer.class, id);
+        return postCount != null && postCount > 0;
+    }
+
+    @Override
+    public boolean updateImage(Long id, byte[] image) {
+        int updated = jdbcTemplate.update("update post set image=? where id=?", image, id);
+        return updated > 0;
+    }
 }

@@ -68,4 +68,12 @@ public class PostService {
     public void deleteById(Long postId) {
         postRepository.deleteById(postId);
     }
+
+    public boolean existsPostById(Long id) {
+        return postRepository.existsById(id);
+    }
+
+    public boolean updateImage(Long id, byte[] image) {
+        return postRepository.updateImage(id, image);
+    }
 }

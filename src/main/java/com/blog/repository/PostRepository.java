@@ -15,4 +15,8 @@ public interface PostRepository {
     void deleteById(Long id);
 
     void incrementLikesCount(Long id);
+
+    boolean existsById(Long id);
+
+    boolean updateImage(Long id, byte[] image);
 }
