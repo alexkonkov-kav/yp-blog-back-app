@@ -1,8 +1,10 @@
 package com.blog.controller;
 
+import com.blog.dto.comment.CommentResponseDto;
 import com.blog.dto.post.CreatePostRequestDto;
 import com.blog.dto.post.PostResponseDto;
 import com.blog.dto.post.UpdatePostRequestDto;
+import com.blog.service.CommentService;
 import com.blog.service.PostService;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -11,20 +13,30 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/posts")
 public class PostController {
 
     private final PostService postService;
+    private final CommentService commentService;
 
-    public PostController(PostService postService) {
+    public PostController(PostService postService,
+                          CommentService commentService) {
         this.postService = postService;
+        this.commentService = commentService;
     }
 
     @GetMapping(path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
     public PostResponseDto getPost(@PathVariable("id") Long id) {
         return postService.findById(id);
+    }
+
+    @GetMapping(path = "/{id}/comments", produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<CommentResponseDto> getComments(@PathVariable("id") Long id) {
+        return commentService.findCommentsByPostId(id);
     }
 
     @GetMapping(path = "/{id}/image", produces = MediaType.IMAGE_PNG_VALUE)
