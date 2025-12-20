@@ -17,6 +17,8 @@ public class Post {
 
     private List<Tag> tags = new ArrayList<>();
 
+    private byte[] image;
+
     public Post() {
     }
 
