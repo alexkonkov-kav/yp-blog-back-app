@@ -1,6 +1,7 @@
 package com.blog.service;
 
 import com.blog.dto.comment.CommentResponseDto;
+import com.blog.mapper.CommentMapper;
 import com.blog.model.Comment;
 import com.blog.repository.CommentRepository;
 import org.springframework.http.HttpStatus;
@@ -13,9 +14,12 @@ import java.util.List;
 public class CommentService {
 
     private final CommentRepository commentRepository;
+    private final CommentMapper commentMapper;
 
-    public CommentService(CommentRepository commentRepository) {
+    public CommentService(CommentRepository commentRepository,
+                          CommentMapper commentMapper) {
         this.commentRepository = commentRepository;
+        this.commentMapper = commentMapper;
     }
 
     public List<CommentResponseDto> findCommentsByPostId(Long postId) {
@@ -26,5 +30,11 @@ public class CommentService {
         return comments.stream()
                 .map(e -> new CommentResponseDto(e.getId(), e.getText(), postId))
                 .toList();
+    }
+
+    public CommentResponseDto getCommentByCommentIdAndPostId(Long commentId, Long postId) {
+        Comment comment = commentRepository.findByIdAndPostId(commentId, postId).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Comment id: " + commentId + " not found for post id: " + postId));
+        return commentMapper.mapToResponse(comment, postId);
     }
 }

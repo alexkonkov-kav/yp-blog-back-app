@@ -12,6 +12,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -37,6 +38,15 @@ public class PostController {
     @GetMapping(path = "/{id}/comments", produces = MediaType.APPLICATION_JSON_VALUE)
     public List<CommentResponseDto> getComments(@PathVariable("id") Long id) {
         return commentService.findCommentsByPostId(id);
+    }
+
+    @GetMapping(path = "/{postId}/comments/{commentId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseStatus(HttpStatus.OK)
+    public CommentResponseDto getCommentByPost(@PathVariable("postId") Long postId, @PathVariable("commentId") Long commentId) {
+        if (!postService.existsPostById(postId)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found with id: " + postId);
+        }
+        return commentService.getCommentByCommentIdAndPostId(commentId, postId);
     }
 
     @GetMapping(path = "/{id}/image", produces = MediaType.IMAGE_PNG_VALUE)
