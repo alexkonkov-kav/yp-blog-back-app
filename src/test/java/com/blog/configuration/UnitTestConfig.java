@@ -1,5 +1,6 @@
 package com.blog.configuration;
 
+import com.blog.mapper.CommentMapper;
 import com.blog.mapper.PostMapper;
 import com.blog.repository.CommentRepository;
 import com.blog.repository.PostRepository;
@@ -26,8 +27,9 @@ public class UnitTestConfig {
     }
 
     @Bean
-    public CommentService commentService(CommentRepository commentRepository) {
-        return new CommentService(commentRepository);
+    public CommentService commentService(CommentRepository commentRepository,
+                                         CommentMapper commentMapper) {
+        return new CommentService(commentRepository, commentMapper);
     }
 
     @Bean
@@ -53,5 +55,10 @@ public class UnitTestConfig {
     @Bean
     public CommentRepository commentRepository() {
         return mock(CommentRepository.class);
+    }
+
+    @Bean
+    public CommentMapper commentMapper() {
+        return mock(CommentMapper.class);
     }
 }

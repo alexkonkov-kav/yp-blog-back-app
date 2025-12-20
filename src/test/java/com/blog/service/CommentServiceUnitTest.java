@@ -2,6 +2,7 @@ package com.blog.service;
 
 import com.blog.configuration.UnitTestConfig;
 import com.blog.dto.comment.CommentResponseDto;
+import com.blog.mapper.CommentMapper;
 import com.blog.model.Comment;
 import com.blog.repository.CommentRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,6 +19,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -33,9 +35,12 @@ public class CommentServiceUnitTest {
     @Autowired
     private CommentRepository commentRepository;
 
+    @Autowired
+    private CommentMapper commentMapper;
+
     @BeforeEach
     void setUp() {
-        Mockito.reset(commentRepository);
+        Mockito.reset(commentRepository, commentMapper);
     }
 
     @Test
@@ -68,5 +73,35 @@ public class CommentServiceUnitTest {
         assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
         assertTrue(Objects.requireNonNull(exception.getReason()).contains("Comment not found for post id: " + postId));
         verify(commentRepository, times(1)).findByPostId(postId);
+    }
+
+    @Test
+    void testGetCommentByCommentIdAndPostId_Success() {
+        Long postId = 1L;
+        Comment mockComment = new Comment();
+        mockComment.setId(10L);
+        mockComment.setText("Test comment text");
+        CommentResponseDto expectedDto = new CommentResponseDto(mockComment.getId(), mockComment.getText(), postId);
+        when(commentRepository.findByIdAndPostId(mockComment.getId(), postId)).thenReturn(Optional.of(mockComment));
+        when(commentMapper.mapToResponse(mockComment, postId)).thenReturn(expectedDto);
+        CommentResponseDto resultDto = commentService.getCommentByCommentIdAndPostId(mockComment.getId(), postId);
+        assertNotNull(resultDto);
+        assertEquals(mockComment.getId(), resultDto.getId());
+        assertEquals(mockComment.getText(), resultDto.getText());
+        assertEquals(postId, resultDto.getPostId());
+        verify(commentRepository, times(1)).findByIdAndPostId(mockComment.getId(), postId);
+        verify(commentMapper, times(1)).mapToResponse(mockComment, postId);
+    }
+
+    @Test
+    void testGetCommentByCommentIdAndPostId_NotFound() {
+        Long postId = 1L;
+        Long commentId = 999L;
+        when(commentRepository.findByIdAndPostId(commentId, postId)).thenReturn(Optional.empty());
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () ->
+                commentService.getCommentByCommentIdAndPostId(commentId, postId));
+        assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
+        assertTrue(Objects.requireNonNull(exception.getReason()).contains("not found for post id: " + postId));
+        verify(commentMapper, never()).mapToResponse(any(), anyLong());
     }
 }

@@ -205,4 +205,14 @@ public class PostControllerIntegrationTest {
                 .andExpect(jsonPath("$[0].text").value("Test comment name 1"))
                 .andExpect(jsonPath("$[1].text").value("Test comment name 2"));
     }
+
+    @Test
+    void getCommentByPost() throws Exception {
+        mockMvc.perform(get("/api/posts/{postId}/comments/{commentId}", 1L, 1L))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.text").value("Test comment name 1"))
+                .andExpect(jsonPath("$.postId").value(1));
+    }
 }

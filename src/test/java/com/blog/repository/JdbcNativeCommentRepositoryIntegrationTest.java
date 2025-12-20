@@ -10,6 +10,7 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -51,5 +52,19 @@ public class JdbcNativeCommentRepositoryIntegrationTest {
         List<Comment> comments = commentRepository.findByPostId(999L);
         assertNotNull(comments);
         assertTrue(comments.isEmpty(), "Для несуществующего поста список должен быть пустым");
+    }
+
+    @Test
+    void findByIdAndPostId_shouldReturnOneComment() {
+        Comment comment = commentRepository.findByIdAndPostId(1L, 1L).orElse(null);
+        assertNotNull(comment);
+        assertNotNull(1L, "ID должен быть сгенерирован");
+        assertEquals("Test text comment 1", comment.getText());
+    }
+
+    @Test
+    void findByIdAndPostId_shouldReturnEmptyCommentWhenPostIdIncorrect() {
+        Optional<Comment> comment = commentRepository.findByIdAndPostId(1L, 999L);
+        assertTrue(comment.isEmpty());
     }
 }
