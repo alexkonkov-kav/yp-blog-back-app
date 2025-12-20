@@ -4,10 +4,7 @@ import com.blog.mapper.CommentMapper;
 import com.blog.mapper.PostMapper;
 import com.blog.repository.CommentRepository;
 import com.blog.repository.PostRepository;
-import com.blog.service.CommentService;
-import com.blog.service.PostService;
-import com.blog.service.PostTagService;
-import com.blog.service.TagService;
+import com.blog.service.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -30,6 +27,13 @@ public class UnitTestConfig {
     public CommentService commentService(CommentRepository commentRepository,
                                          CommentMapper commentMapper) {
         return new CommentService(commentRepository, commentMapper);
+    }
+
+    @Bean
+    public PostCommentService postCommentService(CommentMapper commentMapper,
+                                                 PostRepository postRepository,
+                                                 CommentRepository commentRepository) {
+        return new PostCommentService(commentMapper, postRepository, commentRepository);
     }
 
     @Bean

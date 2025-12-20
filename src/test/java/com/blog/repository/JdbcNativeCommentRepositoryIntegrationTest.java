@@ -2,6 +2,7 @@ package com.blog.repository;
 
 import com.blog.configuration.DataSourceConfig;
 import com.blog.model.Comment;
+import com.blog.model.Post;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,5 +67,14 @@ public class JdbcNativeCommentRepositoryIntegrationTest {
     void findByIdAndPostId_shouldReturnEmptyCommentWhenPostIdIncorrect() {
         Optional<Comment> comment = commentRepository.findByIdAndPostId(1L, 999L);
         assertTrue(comment.isEmpty());
+    }
+
+    @Test
+    void save_shouldCreateNewPost() {
+        Post post = new Post(1L, "Test title 1", "Test text 1");
+        Comment comment = new Comment("Комментарий к посту", post);
+        Comment savedComment = commentRepository.save(comment);
+        assertNotNull(savedComment.getId(), "ID должен быть сгенерирован");
+        assertEquals(savedComment.getText(), "Комментарий к посту");
     }
 }

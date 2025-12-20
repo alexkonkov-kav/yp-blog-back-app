@@ -215,4 +215,23 @@ public class PostControllerIntegrationTest {
                 .andExpect(jsonPath("$.text").value("Test comment name 1"))
                 .andExpect(jsonPath("$.postId").value(1));
     }
+
+    @Test
+    void addCommentToPost_success() throws Exception {
+        String json = """
+                {"text":"Комментарий к посту","postId":"1"}
+                """;
+        mockMvc.perform(post("/api/posts/{postId}/comments", 1L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isCreated())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.id").exists())
+                .andExpect(jsonPath("$.text").value("Комментарий к посту"))
+                .andExpect(jsonPath("$.postId").value(1));
+        Integer commentsInDb = jdbcTemplate.queryForObject(
+                "SELECT count(*) FROM comment WHERE post_id = ? AND text = ?",
+                Integer.class, 1, "Комментарий к посту");
+        assertEquals(1, commentsInDb, "Комментарий должен быть сохранен в таблице comment");
+    }
 }
