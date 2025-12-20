@@ -61,4 +61,10 @@ public class JdbcNativeCommentRepository implements CommentRepository {
                         }, id, postId);
         return comments.isEmpty() ? Optional.empty() : Optional.of(comments.getFirst());
     }
+
+    @Override
+    public void update(Comment comment) {
+        jdbcTemplate.update("update comment set text = ? where id = ?",
+                comment.getText(), comment.getId());
+    }
 }

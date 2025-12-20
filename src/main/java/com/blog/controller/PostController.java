@@ -2,6 +2,7 @@ package com.blog.controller;
 
 import com.blog.dto.comment.CommentResponseDto;
 import com.blog.dto.comment.CreateCommentRequestDto;
+import com.blog.dto.comment.UpdateCommentRequestDto;
 import com.blog.dto.post.CreatePostRequestDto;
 import com.blog.dto.post.PostResponseDto;
 import com.blog.dto.post.UpdatePostRequestDto;
@@ -92,6 +93,16 @@ public class PostController {
     public PostResponseDto update(@PathVariable("id") Long id, @RequestBody UpdatePostRequestDto request) {
         request.setId(id);
         return postService.updatePost(request);
+    }
+
+    @PutMapping(path = "/{postId}/comments/{commentId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseStatus(HttpStatus.OK)
+    public CommentResponseDto updateCommentToPost(@PathVariable("postId") Long postId, @PathVariable("commentId") Long commentId,
+                                                  @RequestBody UpdateCommentRequestDto request) {
+        if (!postService.existsPostById(postId)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found with id: " + postId);
+        }
+        return commentService.updateComment(postId, commentId, request);
     }
 
     @PutMapping(path = "/{id}/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
