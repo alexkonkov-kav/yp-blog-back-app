@@ -23,7 +23,7 @@ public class TagService {
     public List<Tag> findOrSaveTags(List<String> tagNames) {
         List<Tag> tags = new ArrayList<>();
         for (String tagName : tagNames) {
-            Tag tag = tagRepository.findByName(tagName).orElse(tagRepository.save(new Tag(tagName)));
+            Tag tag = tagRepository.findByName(tagName).orElseGet(() -> tagRepository.save(new Tag(tagName)));
             tags.add(tag);
         }
         return tags;
