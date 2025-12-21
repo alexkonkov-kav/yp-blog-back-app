@@ -33,4 +33,11 @@ public class PostCommentService {
         postRepository.incrementCommentsCount(postId);
         return commentMapper.mapToResponse(comment, postId);
     }
+
+    public void deleteCommentAndDecrementCount(Long postId, Long commentId) {
+        int deleteRow = commentRepository.deleteByIdAndPostId(commentId, postId);
+        if (deleteRow > 0) {
+            postRepository.decrementCommentsCount(postId);
+        }
+    }
 }

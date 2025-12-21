@@ -139,6 +139,6 @@ public class PostController {
     @DeleteMapping("/{postId}/comments/{commentId}")
     @ResponseStatus(HttpStatus.OK)
     public void deleteComment(@PathVariable("postId") Long postId, @PathVariable("commentId") Long commentId) {
-        commentService.deleteCommentByIdAndPostId(commentId, postId);
+        postCommentService.deleteCommentAndDecrementCount(postId, commentId);
     }
 }

@@ -122,12 +122,4 @@ public class CommentServiceUnitTest {
         verify(commentRepository, never()).update(any());
         verify(commentMapper, never()).mapToResponse(any(), anyLong());
     }
-
-    @Test
-    void testDeleteCommentByIdAndPostId_Success() {
-        Long postId = 1L;
-        Long comment = 2L;
-        commentService.deleteCommentByIdAndPostId(comment, postId);
-        verify(commentRepository, times(1)).deleteByIdAndPostId(comment, postId);
-    }
 }

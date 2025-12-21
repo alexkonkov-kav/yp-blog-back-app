@@ -25,6 +25,8 @@ public interface PostRepository {
 
     void incrementCommentsCount(Long id);
 
+    void decrementCommentsCount(Long id);
+
     List<Post> findAll(String search, List<String> searchTags, int limit, int offset);
 
     long count(String search, List<String> searchTags);

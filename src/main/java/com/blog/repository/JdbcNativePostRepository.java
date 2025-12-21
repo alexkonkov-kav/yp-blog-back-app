@@ -97,6 +97,11 @@ public class JdbcNativePostRepository implements PostRepository {
     }
 
     @Override
+    public void decrementCommentsCount(Long id) {
+        jdbcTemplate.update("update post set comments_count = greatest(0, comments_count - 1) where id = ?", id);
+    }
+
+    @Override
     public List<Post> findAll(String search, List<String> searchTags, int limit, int offset) {
         StringBuilder sql = new StringBuilder("select p.id, p.title, p.text, p.likes_count, p.comments_count, p.image from post p");
         List<Object> params = new ArrayList<>();

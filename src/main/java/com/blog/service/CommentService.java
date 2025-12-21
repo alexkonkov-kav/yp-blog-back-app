@@ -43,8 +43,4 @@ public class CommentService {
         commentRepository.update(comment);
         return commentMapper.mapToResponse(comment, postId);
     }
-
-    public void deleteCommentByIdAndPostId(Long commentId, Long postId) {
-        commentRepository.deleteByIdAndPostId(commentId, postId);
-    }
 }
