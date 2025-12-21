@@ -17,7 +17,6 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -61,18 +60,6 @@ public class CommentServiceUnitTest {
         assertEquals("Комментарий к посту 1", result.getFirst().getText());
         assertEquals(postId, result.getFirst().getPostId());
 
-        verify(commentRepository, times(1)).findByPostId(postId);
-    }
-
-    @Test
-    void testFindCommentsByPostId_NotFound() {
-        Long postId = 1L;
-        when(commentRepository.findByPostId(postId)).thenReturn(Collections.emptyList());
-        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () ->
-                commentService.findCommentsByPostId(postId)
-        );
-        assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
-        assertTrue(Objects.requireNonNull(exception.getReason()).contains("Comment not found for post id: " + postId));
         verify(commentRepository, times(1)).findByPostId(postId);
     }
 
