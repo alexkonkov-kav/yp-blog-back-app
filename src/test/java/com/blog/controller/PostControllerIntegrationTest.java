@@ -265,6 +265,7 @@ public class PostControllerIntegrationTest {
     void deleteComment() throws Exception {
         Long postId = 1L;
         Long commentId = 2L;
+        jdbcTemplate.update("UPDATE post SET comments_count = 2 WHERE id = ?", postId);
         Integer beforeDeleteCount = jdbcTemplate.queryForObject(
                 "SELECT count(*) FROM comment WHERE id = ? AND post_id = ?", Integer.class, commentId, postId);
         assertEquals(1, beforeDeleteCount);
@@ -273,5 +274,20 @@ public class PostControllerIntegrationTest {
         Integer afterDeleteCount = jdbcTemplate.queryForObject(
                 "SELECT count(*) FROM comment WHERE id = ? AND post_id = ?", Integer.class, commentId, postId);
         assertEquals(0, afterDeleteCount, "Комментарий должен быть удален");
+        Integer postCommentsCount = jdbcTemplate.queryForObject(
+                "SELECT comments_count FROM post WHERE id = ?", Integer.class, postId);
+        assertEquals(1, postCommentsCount, "Счетчик comments_count должен уменьшиться на 1");
+    }
+
+    @Test
+    void deleteComment_NotFoundComment_ShouldNotChangeCounter() throws Exception {
+        Long postId = 1L;
+        Long fakeCommentId = 999L;
+        jdbcTemplate.update("UPDATE post SET comments_count = 5 WHERE id = ?", postId);
+        mockMvc.perform(delete("/api/posts/{postId}/comments/{commentId}", postId, fakeCommentId))
+                .andExpect(status().isOk());
+        Integer postCommentsCount = jdbcTemplate.queryForObject(
+                "SELECT comments_count FROM post WHERE id = ?", Integer.class, postId);
+        assertEquals(5, postCommentsCount);
     }
 }

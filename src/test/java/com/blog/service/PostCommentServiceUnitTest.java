@@ -80,4 +80,24 @@ public class PostCommentServiceUnitTest {
         verify(commentRepository, never()).save(any());
         verify(postRepository, never()).incrementCommentsCount(anyLong());
     }
+
+    @Test
+    void deleteCommentAndDecrementCount_Success() {
+        Long postId = 1L;
+        Long commentId = 10L;
+        when(commentRepository.deleteByIdAndPostId(commentId, postId)).thenReturn(1);
+        postCommentService.deleteCommentAndDecrementCount(postId, commentId);
+        verify(commentRepository, times(1)).deleteByIdAndPostId(commentId, postId);
+        verify(postRepository, times(1)).decrementCommentsCount(postId);
+    }
+
+    @Test
+    void deleteCommentAndDecrementCount_NotFound() {
+        Long postId = 1L;
+        Long commentId = 999L;
+        when(commentRepository.deleteByIdAndPostId(commentId, postId)).thenReturn(0);
+        postCommentService.deleteCommentAndDecrementCount(postId, commentId);
+        verify(commentRepository, times(1)).deleteByIdAndPostId(commentId, postId);
+        verify(postRepository, never()).decrementCommentsCount(anyLong());
+    }
 }
