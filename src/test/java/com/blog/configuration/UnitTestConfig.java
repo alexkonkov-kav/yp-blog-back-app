@@ -19,8 +19,9 @@ public class UnitTestConfig {
     public PostService postService(PostRepository postRepository,
                                    TagService tagService,
                                    PostTagService postTagService,
-                                   PostMapper postMapper) {
-        return new PostService(postRepository, tagService, postTagService, postMapper);
+                                   PostMapper postMapper,
+                                   SearchParamService searchParamService) {
+        return new PostService(postRepository, tagService, postTagService, postMapper, searchParamService);
     }
 
     @Bean
@@ -64,5 +65,10 @@ public class UnitTestConfig {
     @Bean
     public CommentMapper commentMapper() {
         return mock(CommentMapper.class);
+    }
+
+    @Bean
+    public SearchParamService searchParamService() {
+        return mock(SearchParamService.class);
     }
 }

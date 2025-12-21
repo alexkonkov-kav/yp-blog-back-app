@@ -4,6 +4,7 @@ import com.blog.dto.comment.CommentResponseDto;
 import com.blog.dto.comment.CreateCommentRequestDto;
 import com.blog.dto.comment.UpdateCommentRequestDto;
 import com.blog.dto.post.CreatePostRequestDto;
+import com.blog.dto.post.PagedPostResponseDto;
 import com.blog.dto.post.PostResponseDto;
 import com.blog.dto.post.UpdatePostRequestDto;
 import com.blog.service.CommentService;
@@ -33,6 +34,15 @@ public class PostController {
         this.postService = postService;
         this.commentService = commentService;
         this.postCommentService = postCommentService;
+    }
+
+    @GetMapping()
+    public PagedPostResponseDto getSearchPosts(@RequestParam("search") String search,
+                                               @RequestParam("pageNumber") int pageNumber,
+                                               @RequestParam("pageSize") int pageSize) {
+        if (pageNumber < 1) pageNumber = 1;
+        if (pageSize < 1) pageSize = 5;
+        return postService.getPostsWithPaged(search, pageNumber, pageSize);
     }
 
     @GetMapping(path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)

@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 
 import java.sql.PreparedStatement;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -93,5 +94,55 @@ public class JdbcNativePostRepository implements PostRepository {
     @Override
     public void incrementCommentsCount(Long id) {
         jdbcTemplate.update("update post set comments_count = comments_count + 1 where id = ?", id);
+    }
+
+    @Override
+    public List<Post> findAll(String search, List<String> searchTags, int limit, int offset) {
+        StringBuilder sql = new StringBuilder("select p.id, p.title, p.text, p.likes_count, p.comments_count, p.image from post p");
+        List<Object> params = new ArrayList<>();
+        createSqlAndParam(search, searchTags, sql, params);
+        sql.append(" order by p.id limit ? offset ?");
+        params.add(limit);
+        params.add(offset);
+
+        List<Post> posts = jdbcTemplate.query(sql.toString(),
+                (rs, rowNum) -> {
+                    Post post = new Post();
+                    post.setId(rs.getLong("id"));
+                    post.setTitle(rs.getString("title"));
+                    post.setText(rs.getString("text"));
+                    post.setLikesCount(rs.getInt("likes_count"));
+                    post.setCommentsCount(rs.getInt("comments_count"));
+                    return post;
+                }, params.toArray());
+        return posts;
+    }
+
+    @Override
+    public long count(String search, List<String> searchTags) {
+        StringBuilder sql = new StringBuilder("select count(*) from post p");
+        List<Object> params = new ArrayList<>();
+        createSqlAndParam(search, searchTags, sql, params);
+        return jdbcTemplate.queryForObject(sql.toString(), Long.class, params.toArray());
+    }
+
+    private void createSqlAndParam(String search, List<String> searchTags, StringBuilder sql, List<Object> params) {
+        if (!searchTags.isEmpty()) {
+            sql.append(" join post_tag pt on p.id = pt.post_id");
+            sql.append(" join tag t on pt.tag_id = t.id");
+            sql.append(" where ");
+            for (int i = 0; i < searchTags.size(); i++) {
+                if (i > 0) sql.append(" and ");
+                sql.append("lower(t.name) like lower(?)");
+                params.add("%" + searchTags.get(i) + "%");
+            }
+        }
+        if (!search.isEmpty()) {
+            if (searchTags.isEmpty()) {
+                sql.append(" where ");
+            } else sql.append(" and ");
+            sql.append("lower(p.title) like lower(?)");
+            params.add("%" + search.toLowerCase() + "%");
+        }
     }
 }

@@ -2,6 +2,7 @@ package com.blog.repository;
 
 import com.blog.model.Post;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface PostRepository {
@@ -23,4 +24,8 @@ public interface PostRepository {
     byte[] findImageById(Long id);
 
     void incrementCommentsCount(Long id);
+
+    List<Post> findAll(String search, List<String> searchTags, int limit, int offset);
+
+    long count(String search, List<String> searchTags);
 }

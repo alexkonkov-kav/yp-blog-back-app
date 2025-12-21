@@ -1,6 +1,8 @@
 package com.blog.service;
 
+import com.blog.dto.SearchParamDto;
 import com.blog.dto.post.CreatePostRequestDto;
+import com.blog.dto.post.PagedPostResponseDto;
 import com.blog.dto.post.PostResponseDto;
 import com.blog.dto.post.UpdatePostRequestDto;
 import com.blog.mapper.PostMapper;
@@ -20,15 +22,18 @@ public class PostService {
     private final TagService tagService;
     private final PostTagService postTagService;
     private final PostMapper postMapper;
+    private final SearchParamService searchParamService;
 
     public PostService(PostRepository postRepository,
                        TagService tagService,
                        PostTagService postTagService,
-                       PostMapper postMapper) {
+                       PostMapper postMapper,
+                       SearchParamService searchParamService) {
         this.postRepository = postRepository;
         this.tagService = tagService;
         this.postTagService = postTagService;
         this.postMapper = postMapper;
+        this.searchParamService = searchParamService;
     }
 
     public PostResponseDto findById(Long id) {
@@ -79,5 +84,38 @@ public class PostService {
 
     public byte[] getImageByPostId(Long id) {
         return postRepository.findImageById(id);
+    }
+
+    public PagedPostResponseDto getPostsWithPaged(String search, int pageNumber, int pageSize) {
+        SearchParamDto searchParamDto = searchParamService.parseSearchParam(search);
+        int offset = (pageNumber - 1) * pageSize;
+
+        List<Post> posts = postRepository
+                .findAll(searchParamDto.getSearchText(), searchParamDto.getTagNames(), pageSize, offset);
+        long totalElements = postRepository
+                .count(searchParamDto.getSearchText(), searchParamDto.getTagNames());
+
+        long totalPages = (long) Math.ceil((double) totalElements / pageSize);
+        if (totalPages == 0) totalPages = 1;
+
+        List<PostResponseDto> postResponses = posts.stream().map(post -> {
+            post.setText(formatPostText(post.getText()));
+            post.setTags(tagService.findByPostId(post.getId()));
+            return postMapper.mapToResponseDto(post);
+        }).toList();
+
+        boolean hasPrev = pageNumber > 1;
+        boolean hasNext = pageNumber < totalPages;
+
+        return new PagedPostResponseDto(postResponses, hasPrev, hasNext, totalPages);
+    }
+
+    private String formatPostText(String text) {
+        if (text == null) return "";
+
+        if (text.length() > 128) {
+            return text.substring(0, 128) + "...";
+        }
+        return text;
     }
 }
