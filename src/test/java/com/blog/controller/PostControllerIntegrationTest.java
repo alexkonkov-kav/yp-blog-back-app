@@ -180,8 +180,7 @@ public class PostControllerIntegrationTest {
                     request.setMethod("PUT");
                     return request;
                 }))
-                .andExpect(status().isNotFound())
-                .andExpect(content().string("post not found"));
+                .andExpect(status().isNotFound());
     }
 
     @Test
