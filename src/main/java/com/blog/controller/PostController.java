@@ -59,17 +59,15 @@ public class PostController {
     @GetMapping(path = "/{postId}/comments/{commentId}", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
     public CommentResponseDto getCommentByPost(@PathVariable("postId") Long postId, @PathVariable("commentId") Long commentId) {
-        if (!postService.existsPostById(postId)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found with id: " + postId);
-        }
+        checkExistsPost(postId);
+
         return commentService.getCommentByCommentIdAndPostId(commentId, postId);
     }
 
     @GetMapping(path = "/{id}/image", produces = MediaType.IMAGE_PNG_VALUE)
     public ResponseEntity<byte[]> getPostImage(@PathVariable("id") Long id) {
-        if (!postService.existsPostById(id)) {
-            return ResponseEntity.notFound().build();
-        }
+        checkExistsPost(id);
+
         byte[] bytes = postService.getImageByPostId(id);
         if (bytes == null || bytes.length == 0) {
             return ResponseEntity.notFound().build();
@@ -109,17 +107,15 @@ public class PostController {
     @ResponseStatus(HttpStatus.OK)
     public CommentResponseDto updateCommentToPost(@PathVariable("postId") Long postId, @PathVariable("commentId") Long commentId,
                                                   @RequestBody UpdateCommentRequestDto request) {
-        if (!postService.existsPostById(postId)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found with id: " + postId);
-        }
+        checkExistsPost(postId);
+
         return commentService.updateComment(postId, commentId, request);
     }
 
     @PutMapping(path = "/{id}/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<String> updatePostImage(@PathVariable("id") Long id, @RequestParam("image") MultipartFile image) throws Exception {
-        if (!postService.existsPostById(id)) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("post not found");
-        }
+        checkExistsPost(id);
+
         if (image.isEmpty()) {
             return ResponseEntity.badRequest().body("empty image");
         }
@@ -140,5 +136,11 @@ public class PostController {
     @ResponseStatus(HttpStatus.OK)
     public void deleteComment(@PathVariable("postId") Long postId, @PathVariable("commentId") Long commentId) {
         postCommentService.deleteCommentAndDecrementCount(postId, commentId);
+    }
+
+    private void checkExistsPost(Long postId) {
+        if (!postService.existsPostById(postId)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found with id: " + postId);
+        }
     }
 }
