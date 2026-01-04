@@ -44,8 +44,8 @@ public class PostService {
     }
 
     public PostResponseDto savePost(CreatePostRequestDto request) {
-        Post post = postRepository.save(new Post(request.title(), request.text()));
-        List<Tag> tags = tagService.findOrSaveTags(request.tags());
+        Post post = postRepository.save(new Post(request.getTitle(), request.getText()));
+        List<Tag> tags = tagService.findOrSaveTags(request.getTags());
         post.setTags(tags);
         postTagService.saveLinkPostTag(post);
         return postMapper.mapToResponseDto(post);

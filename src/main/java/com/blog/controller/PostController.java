@@ -10,10 +10,12 @@ import com.blog.dto.post.UpdatePostRequestDto;
 import com.blog.service.CommentService;
 import com.blog.service.PostCommentService;
 import com.blog.service.PostService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
@@ -21,6 +23,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 
 @RestController
+@Validated
 @RequestMapping("/api/posts")
 public class PostController {
 
@@ -80,7 +83,7 @@ public class PostController {
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
-    public PostResponseDto save(@RequestBody CreatePostRequestDto request) {
+    public PostResponseDto save(@Valid @RequestBody CreatePostRequestDto request) {
         return postService.savePost(request);
     }
 
@@ -92,13 +95,13 @@ public class PostController {
 
     @PostMapping(path = "/{postId}/comments", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
-    public CommentResponseDto addCommentToPost(@PathVariable("postId") Long postId, @RequestBody CreateCommentRequestDto request) {
+    public CommentResponseDto addCommentToPost(@PathVariable("postId") Long postId, @Valid @RequestBody CreateCommentRequestDto request) {
         return postCommentService.addCommentToPost(postId, request);
     }
 
     @PutMapping(path = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
-    public PostResponseDto update(@PathVariable("id") Long id, @RequestBody UpdatePostRequestDto request) {
+    public PostResponseDto update(@PathVariable("id") Long id, @Valid @RequestBody UpdatePostRequestDto request) {
         request.setId(id);
         return postService.updatePost(request);
     }
@@ -106,7 +109,7 @@ public class PostController {
     @PutMapping(path = "/{postId}/comments/{commentId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
     public CommentResponseDto updateCommentToPost(@PathVariable("postId") Long postId, @PathVariable("commentId") Long commentId,
-                                                  @RequestBody UpdateCommentRequestDto request) {
+                                                  @Valid @RequestBody UpdateCommentRequestDto request) {
         checkExistsPost(postId);
 
         return commentService.updateComment(postId, commentId, request);
