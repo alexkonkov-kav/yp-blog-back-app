@@ -2,12 +2,13 @@ package com.blog.dto.post;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
 
 public class UpdatePostRequestDto {
 
-    @NotBlank(message = "Идентификатор поста обязателен")
+    @NotNull(message = "Идентификатор поста обязателен")
     private Long id;
 
     @NotBlank(message = "Название поста обязательно")
