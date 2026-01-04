@@ -1,15 +1,23 @@
 package com.blog.dto.post;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+
 import java.util.List;
 
 public class UpdatePostRequestDto {
 
+    @NotNull(message = "Идентификатор поста обязателен")
     private Long id;
 
+    @NotBlank(message = "Название поста обязательно")
     private String title;
 
+    @NotBlank(message = "Текст поста обязателен")
     private String text;
 
+    @NotEmpty(message = "Список тегов обязателен")
     private List<String> tags;
 
     public UpdatePostRequestDto() {

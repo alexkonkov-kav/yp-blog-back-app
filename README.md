@@ -1,12 +1,22 @@
 # Проектная работа яндекс практикум, спринт 3. 
 
-Создание бэкенд приложения-блога с использованием Spring Framework.
+Обновленное бэкенд приложение-блога с использованием SpringBoot и Gradle.
+
+---
+
+## Что изменилось
+
+- **Используется SpringBoot**, вместо Springframework
+
+- **Изменена система сборки приложения на Gradle**. Ранее была Maven
+
+- **Встроенный сервер Tomcat**, вместо сборки .war
 
 ---
 
 ## Что внутри
 
-- **REST-контроллер** `PostController` (`/api/posts"`)
+- **REST-контроллеры** `PostController`, `CommentController` и `ImageController` (`/api/posts"`)
 
 - **DAO-слой**: `Post`, `Comment`, `Tag`, `Post_Tag`" репозитории на `JdbcTemplate`
 
@@ -14,14 +24,14 @@
 
 - **Тесты**:
     - пакет `service` — unit тесты сервиса
-    - пакет `controller` и `repository` — интеграционные тесты контроллера и репозитория (JdbcTemplate + H2)
+    - пакет `controller` и `repository` — интеграционные и WebMvc тесты контроллера и репозитория (JdbcTemplate + H2)
 
 ---
 
 ## Запуск приложения
 
-- **Собрать проект с помощью Maven:** `mvn clean package`
+- **Сборка проекта:** `./gradlew build`
 
-- **Скопировать файл target/ROOT.war в папку:** `webapps Tomcat`
+- **Запуск:** `./gradlew bootRun`
 
-- **Запустить:** `webapps Tomcat`
+- **Приложение будет доступно по адресу:** `http://localhost:8080`

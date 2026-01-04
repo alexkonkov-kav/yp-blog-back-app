@@ -1,20 +1,16 @@
 package com.blog.service;
 
-import com.blog.configuration.UnitTestConfig;
 import com.blog.dto.comment.CommentResponseDto;
 import com.blog.dto.comment.UpdateCommentRequestDto;
 import com.blog.mapper.CommentMapper;
 import com.blog.model.Comment;
 import com.blog.repository.CommentRepository;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
@@ -24,24 +20,17 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = UnitTestConfig.class)
-@ActiveProfiles("unitTest")
+@ExtendWith(MockitoExtension.class)
 public class CommentServiceUnitTest {
 
-    @Autowired
+    @InjectMocks
     private CommentService commentService;
 
-    @Autowired
+    @Mock
     private CommentRepository commentRepository;
 
-    @Autowired
+    @Mock
     private CommentMapper commentMapper;
-
-    @BeforeEach
-    void setUp() {
-        Mockito.reset(commentRepository, commentMapper);
-    }
 
     @Test
     void testFindCommentsByPostId_Success() {

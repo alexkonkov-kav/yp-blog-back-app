@@ -1,6 +1,5 @@
 package com.blog.service;
 
-import com.blog.configuration.UnitTestConfig;
 import com.blog.dto.post.CreatePostRequestDto;
 import com.blog.dto.post.PostResponseDto;
 import com.blog.dto.post.UpdatePostRequestDto;
@@ -8,15 +7,12 @@ import com.blog.mapper.PostMapper;
 import com.blog.model.Post;
 import com.blog.model.Tag;
 import com.blog.repository.PostRepository;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Arrays;
@@ -27,30 +23,23 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = UnitTestConfig.class)
-@ActiveProfiles("unitTest")
+@ExtendWith(MockitoExtension.class)
 public class PostServiceUnitTest {
 
-    @Autowired
+    @InjectMocks
     private PostService postService;
 
-    @Autowired
+    @Mock
     private PostRepository postRepository;
 
-    @Autowired
+    @Mock
     private TagService tagService;
 
-    @Autowired
+    @Mock
     private PostTagService postTagService;
 
-    @Autowired
+    @Mock
     private PostMapper postMapper;
-
-    @BeforeEach
-    void setUp() {
-        Mockito.reset(postRepository, tagService, postTagService, postMapper);
-    }
 
     @Test()
     void testFindById_Success() {

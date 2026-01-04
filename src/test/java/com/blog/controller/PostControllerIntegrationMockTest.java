@@ -1,70 +1,44 @@
 package com.blog.controller;
 
-import org.junit.jupiter.api.BeforeEach;
+import com.blog.dto.post.CreatePostRequestDto;
+import com.blog.dto.post.PostResponseDto;
+import com.blog.dto.post.UpdatePostRequestDto;
+import com.blog.service.PostService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
 
+import java.util.List;
+
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
-@AutoConfigureMockMvc
-public class PostControllerIntegrationTest {
+@WebMvcTest(PostController.class)
+public class PostControllerIntegrationMockTest {
 
     @Autowired
-    private WebApplicationContext wac;
-
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
-
     private MockMvc mockMvc;
 
-    @BeforeEach
-    void setup() {
-        mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
-
-        jdbcTemplate.execute("DELETE FROM post");
-        jdbcTemplate.execute("DELETE FROM tag");
-        jdbcTemplate.execute("DELETE FROM post_tag");
-        jdbcTemplate.execute("ALTER TABLE post ALTER COLUMN id RESTART WITH 1");
-        jdbcTemplate.execute("ALTER TABLE tag ALTER COLUMN id RESTART WITH 1");
-        jdbcTemplate.execute("""
-                    INSERT INTO post (title, text)
-                    VALUES ('Test title 1','Test text 1')
-                """);
-        jdbcTemplate.execute("""
-                    INSERT INTO post (title, text)
-                    VALUES ('Test title 2','Test text 2')
-                """);
-        jdbcTemplate.execute("""
-                    INSERT INTO tag (name)
-                    VALUES ('Test name 1')
-                """);
-        jdbcTemplate.execute("""
-                    INSERT INTO tag (name)
-                    VALUES ('Test name 2')
-                """);
-        jdbcTemplate.execute("""
-                    INSERT INTO post_tag (post_id, tag_id)
-                    VALUES (1,1)
-                """);
-        jdbcTemplate.execute("""
-                    INSERT INTO post_tag (post_id, tag_id)
-                    VALUES (1,2)
-                """);
-    }
+    @MockitoBean
+    private PostService postService;
 
     @Test
     void getPost() throws Exception {
+        PostResponseDto postDto = new PostResponseDto();
+        postDto.setId(1L);
+        postDto.setTitle("Test title 1");
+        postDto.setText("Test text 1");
+        postDto.setTags(List.of("Test name 1", "Test name 2"));
+        postDto.setLikesCount(0);
+        postDto.setCommentsCount(0);
+        when(postService.findById(1L)).thenReturn(postDto);
+
         mockMvc.perform(get("/api/posts/{id}", 1L))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -82,6 +56,15 @@ public class PostControllerIntegrationTest {
         String json = """
                 {"title":"Название поста 3","text":"Текст поста в формате Markdown...","tags":["tag_1", "tag_2"]}
                 """;
+        PostResponseDto postDto = new PostResponseDto();
+        postDto.setId(3L);
+        postDto.setTitle("Название поста 3");
+        postDto.setText("Текст поста в формате Markdown...");
+        postDto.setTags(List.of("tag_1", "tag_2"));
+        postDto.setLikesCount(0);
+        postDto.setCommentsCount(0);
+
+        when(postService.savePost(org.mockito.ArgumentMatchers.any(CreatePostRequestDto.class))).thenReturn(postDto);
 
         mockMvc.perform(post("/api/posts")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -100,6 +83,14 @@ public class PostControllerIntegrationTest {
         String json = """
                 {"id":2,"title":"Название поста 3","text":"Текст поста в формате Markdown...","tags":["tag_1", "tag_2"]}
                 """;
+        PostResponseDto postDto = new PostResponseDto();
+        postDto.setId(2L);
+        postDto.setTitle("Название поста 3");
+        postDto.setText("Текст поста в формате Markdown...");
+        postDto.setTags(List.of("tag_1", "tag_2"));
+        postDto.setLikesCount(0);
+        postDto.setCommentsCount(0);
+        when(postService.updatePost(org.mockito.ArgumentMatchers.any(UpdatePostRequestDto.class))).thenReturn(postDto);
 
         mockMvc.perform(put("/api/posts/{id}", 2L)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -111,14 +102,13 @@ public class PostControllerIntegrationTest {
                 .andExpect(jsonPath("$.text").value("Текст поста в формате Markdown..."))
                 .andExpect(jsonPath("$.tags", hasSize(2)))
                 .andExpect(jsonPath("$.tags", containsInAnyOrder("tag_1", "tag_2")));
+
     }
 
     @Test
     void deletePost() throws Exception {
         mockMvc.perform(delete("/api/posts/1"))
                 .andExpect(status().isOk());
-        Integer tagsLinkCount = jdbcTemplate.queryForObject(
-                "SELECT count(*) FROM post_tag WHERE post_id = 1", Integer.class);
-        assertEquals(0, tagsLinkCount, "Связи Post_Tag должны быть удалены каскадно");
+        verify(postService, times(1)).deleteById(1L);
     }
 }

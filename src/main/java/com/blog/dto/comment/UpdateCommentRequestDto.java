@@ -1,11 +1,17 @@
 package com.blog.dto.comment;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+
 public class UpdateCommentRequestDto {
 
+    @NotNull(message = "Идентификатор комментария обязателен")
     private Long id;
 
+    @NotBlank(message = "Текст комментария обязателен")
     private String text;
 
+    @NotNull(message = "Идентификатор поста обязателен")
     private Long postId;
 
     public UpdateCommentRequestDto() {
