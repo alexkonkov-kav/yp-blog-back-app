@@ -1,6 +1,5 @@
 package com.blog.service;
 
-import com.blog.configuration.UnitTestConfig;
 import com.blog.dto.comment.CommentResponseDto;
 import com.blog.dto.comment.CreateCommentRequestDto;
 import com.blog.mapper.CommentMapper;
@@ -8,15 +7,12 @@ import com.blog.model.Comment;
 import com.blog.model.Post;
 import com.blog.repository.CommentRepository;
 import com.blog.repository.PostRepository;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Optional;
@@ -25,27 +21,20 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = UnitTestConfig.class)
-@ActiveProfiles("unitTest")
+@ExtendWith(MockitoExtension.class)
 public class PostCommentServiceUnitTest {
 
-    @Autowired
+    @InjectMocks
     private PostCommentService postCommentService;
 
-    @Autowired
+    @Mock
     private PostRepository postRepository;
 
-    @Autowired
+    @Mock
     private CommentRepository commentRepository;
 
-    @Autowired
+    @Mock
     private CommentMapper commentMapper;
-
-    @BeforeEach
-    void setUp() {
-        Mockito.reset(postRepository, commentRepository, commentMapper);
-    }
 
     @Test
     void addCommentToPost_Success() {
