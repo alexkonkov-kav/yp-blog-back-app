@@ -1,0 +1,153 @@
+package com.blog.repository;
+
+import com.blog.model.Post;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.stereotype.Repository;
+
+import java.sql.PreparedStatement;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+@Repository
+public class JdbcNativePostRepository implements PostRepository {
+
+    private final JdbcTemplate jdbcTemplate;
+
+    public JdbcNativePostRepository(JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
+    }
+
+    @Override
+    public Post save(Post post) {
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        jdbcTemplate.update(e -> {
+            PreparedStatement ps = e.prepareStatement(
+                    "insert into post(title, text) values (?, ?)",
+                    Statement.RETURN_GENERATED_KEYS);
+            ps.setString(1, post.getTitle());
+            ps.setString(2, post.getText());
+            return ps;
+        }, keyHolder);
+        if (keyHolder.getKey() != null) {
+            post.setId(keyHolder.getKey().longValue());
+        }
+        return post;
+    }
+
+    @Override
+    public Optional<Post> findById(Long id) {
+        List<Post> posts = jdbcTemplate
+                .query("select id, title, text, likes_count, comments_count from post where id = ?",
+                        (rs, rowNum) -> {
+                            Post post = new Post();
+                            post.setId(rs.getLong("id"));
+                            post.setTitle(rs.getString("title"));
+                            post.setText(rs.getString("text"));
+                            post.setLikesCount(rs.getInt("likes_count"));
+                            post.setCommentsCount(rs.getInt("comments_count"));
+                            return post;
+                        }, id);
+        return posts.isEmpty() ? Optional.empty() : Optional.of(posts.getFirst());
+    }
+
+    @Override
+    public void update(Post post) {
+        jdbcTemplate.update("update post set title = ?, text = ? where id = ?",
+                post.getTitle(), post.getText(), post.getId());
+    }
+
+    @Override
+    public void deleteById(Long id) {
+        jdbcTemplate.update("delete from post where id = ?", id);
+    }
+
+    @Override
+    public void incrementLikesCount(Long id) {
+        jdbcTemplate.update("update post set likes_count = likes_count + 1 where id = ?", id);
+    }
+
+    @Override
+    public boolean existsById(Long id) {
+        Integer postCount = jdbcTemplate.queryForObject("select count(*) from post where id=?", Integer.class, id);
+        return postCount != null && postCount > 0;
+    }
+
+    @Override
+    public boolean updateImage(Long id, byte[] image) {
+        int updated = jdbcTemplate.update("update post set image=? where id=?", image, id);
+        return updated > 0;
+    }
+
+    @Override
+    public byte[] findImageById(Long id) {
+        return jdbcTemplate.query(
+                "select image from post where id=?",
+                rs -> rs.setLong(1, id),
+                resultSet -> resultSet.next() ? resultSet.getBytes("image") : null
+        );
+    }
+
+    @Override
+    public void incrementCommentsCount(Long id) {
+        jdbcTemplate.update("update post set comments_count = comments_count + 1 where id = ?", id);
+    }
+
+    @Override
+    public void decrementCommentsCount(Long id) {
+        jdbcTemplate.update("update post set comments_count = greatest(0, comments_count - 1) where id = ?", id);
+    }
+
+    @Override
+    public List<Post> findAll(String search, List<String> searchTags, int limit, int offset) {
+        StringBuilder sql = new StringBuilder("select p.id, p.title, p.text, p.likes_count, p.comments_count, p.image from post p");
+        List<Object> params = new ArrayList<>();
+        createSqlAndParam(search, searchTags, sql, params);
+        sql.append(" order by p.id limit ? offset ?");
+        params.add(limit);
+        params.add(offset);
+
+        List<Post> posts = jdbcTemplate.query(sql.toString(),
+                (rs, rowNum) -> {
+                    Post post = new Post();
+                    post.setId(rs.getLong("id"));
+                    post.setTitle(rs.getString("title"));
+                    post.setText(rs.getString("text"));
+                    post.setLikesCount(rs.getInt("likes_count"));
+                    post.setCommentsCount(rs.getInt("comments_count"));
+                    return post;
+                }, params.toArray());
+        return posts;
+    }
+
+    @Override
+    public long count(String search, List<String> searchTags) {
+        StringBuilder sql = new StringBuilder("select count(*) from post p");
+        List<Object> params = new ArrayList<>();
+        createSqlAndParam(search, searchTags, sql, params);
+        return jdbcTemplate.queryForObject(sql.toString(), Long.class, params.toArray());
+    }
+
+    private void createSqlAndParam(String search, List<String> searchTags, StringBuilder sql, List<Object> params) {
+        if (!searchTags.isEmpty()) {
+            sql.append(" join post_tag pt on p.id = pt.post_id");
+            sql.append(" join tag t on pt.tag_id = t.id");
+            sql.append(" where ");
+            for (int i = 0; i < searchTags.size(); i++) {
+                if (i > 0) sql.append(" and ");
+                sql.append("lower(t.name) like lower(?)");
+                params.add("%" + searchTags.get(i) + "%");
+            }
+        }
+        if (!search.isEmpty()) {
+            if (searchTags.isEmpty()) {
+                sql.append(" where ");
+            } else sql.append(" and ");
+            sql.append("lower(p.title) like lower(?)");
+            params.add("%" + search.toLowerCase() + "%");
+        }
+    }
+}
