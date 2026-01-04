@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotNull;
 
 public class UpdateCommentRequestDto {
 
-    @NotBlank(message = "Идентификатор комментария обязателен")
+    @NotNull(message = "Идентификатор комментария обязателен")
     private Long id;
 
     @NotBlank(message = "Текст комментария обязателен")
